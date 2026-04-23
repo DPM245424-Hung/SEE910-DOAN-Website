@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="stylesheet" href="/css/Navbar.css" />
+    <link rel="stylesheet" href="/css/background.css" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <title><%= title %> - Chi Tiết-Thay đổi Chuyến Bay</title>
+</head>
+<body>
+
+    <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
+        <%- include('Navbar') %>
+        
+        <div class="section flex-grow-1">
+            <div class="container-custom">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="/flight">Danh sách chuyến bay</a></li>
+                        <li class="breadcrumb-item active"><%= flight.name %></li>
+                    </ol>
+                </nav>
+
+                <div class="row">
+                    <!-- Left Column - Flight Details -->
+                    <div class="col-lg-7">
+                        <div class="flight-card">
+                            <div class="flight-image">
+                                <i class="bi bi-airplane-fill"></i>
+                            </div>
+                            <div class="p-4">
+                                <!-- Route Info -->
+                                <div class="mb-4">
+                                    <h2 class="text-primary mb-3">
+                                        <%= flight.from_airport %> 
+                                        <i class="bi bi-arrow-right"></i> 
+                                        <%= flight.to_airport %>
+                                    </h2>
+                                    <p class="text-muted mb-0"><strong>Tên chuyến bay:</strong> <%= flight.name %></p>
+                                </div>
+
+                                <!-- Flight Details Grid -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <p class="mb-1 text-muted small"><i class="bi bi-calendar-event"></i> Ngày khởi hành</p>
+                                            <p class="mb-0 fw-bold"><%= new Date(flight.flydate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <p class="mb-1 text-muted small"><i class="bi bi-hourglass-split"></i> Thời gian khởi hành</p>
+                                            <p class="mb-0 fw-bold"><%= new Date(flight.flydate).getHours().toString().padStart(2, '0') %>:<%= new Date(flight.flydate).getMinutes().toString().padStart(2, '0') %></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Airline & Aircraft -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <p class="mb-1 text-muted small"><i class="bi bi-building"></i> Hãng hàng không</p>
+                                            <p class="mb-0 fw-bold"><%= flight.airline %></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <p class="mb-1 text-muted small"><i class="bi bi-airplane2"></i> Loại máy bay</p>
+                                            <p class="mb-0 fw-bold"><%= flight.airplane %></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Seats Info -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <p class="mb-1 text-muted small"><i class="bi bi-chair"></i> Tổng số ghế</p>
+                                            <p class="mb-0 fw-bold"><%= flight.numberseats %> ghế</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <p class="mb-1 text-muted small"><i class="bi bi-check-circle"></i> Ghế còn lại</p>
+                                            <p class="mb-0 fw-bold text-success"><%= flight.numberseats - flight.numberseats_pick %> ghế</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                    
+
+                                <!-- Status Badge -->
+                                <div class="mb-4">
+                                    <% if (flight.status === 'active' || flight.status === 'active') { %>
+                                        <span class="badge bg-success p-2"><i class="bi bi-check-circle"></i> <%= flight.status === 'active' ? 'Đang hoạt động' : flight.status %></span>
+                                    <% } else if (flight.status === 'cancelled') { %>
+                                        <span class="badge bg-danger p-2"><i class="bi bi-x-circle"></i> Đã hủy</span>
+                                    <% } else { %>
+                                        <span class="badge bg-warning p-2"><i class="bi bi-exclamation-circle"></i> <%= flight.status %></span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Admin Edit Section -->
+                    <div class="col-lg-5">
+                        <% if (session.user && session.user.quyenhan === 'admin') { %>
+                            <!-- Admin Edit Form -->
+                            <div class="card border-0 shadow-lg">
+                                <div class="card-header bg-warning text-dark">
+                                    <h4 class="card-title mb-0"><i class="bi bi-pencil-square"></i> Chỉnh Sửa Thông Tin Chuyến Bay</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form action="/flight/Sua/<%= flight._id %>" method="POST" id="editForm">
+                                        <!-- Tên Chuyến Bay -->
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label"><strong>Tên Chuyến Bay <span class="text-danger">*</span></strong></label>
+                                            <input type="text" class="form-control" id="name" name="name" value="<%= flight.name %>" placeholder="Ví dụ: VN001" required>
+                                        </div>
+
+                                        <!-- Hãng Hàng Không -->
+                                        <div class="mb-3">
+                                            <label for="airline" class="form-label"><strong>Hãng Hàng Không <span class="text-danger">*</span></strong></label>
+                                            <input type="text" class="form-control" id="airline" name="airline" value="<%= flight.airline %>" placeholder="Ví dụ: Vietnam Airlines" required>
+                                        </div>
+
+                                        <!-- Loại Máy Bay -->
+                                        <div class="mb-3">
+                                            <label for="airplane" class="form-label"><strong>Loại Máy Bay <span class="text-danger">*</span></strong></label>
+                                            <input type="text" class="form-control" id="airplane" name="airplane" value="<%= flight.airplane %>" placeholder="Ví dụ: Boeing 787" required>
+                                        </div>
+
+                                        <!-- Sân Bay Xuất Phát -->
+                                        <div class="mb-3">
+                                            <label for="from_airport" class="form-label"><strong>Sân Bay Xuất Phát <span class="text-danger">*</span></strong></label>
+                                            <input type="text" class="form-control" id="from_airport" name="from_airport" value="<%= flight.from_airport %>" placeholder="Ví dụ: Tân Sơn Nhất (HAN)" required>
+                                        </div>
+
+                                        <!-- Sân Bay Đích -->
+                                        <div class="mb-3">
+                                            <label for="to_airport" class="form-label"><strong>Sân Bay Đích <span class="text-danger">*</span></strong></label>
+                                            <input type="text" class="form-control" id="to_airport" name="to_airport" value="<%= flight.to_airport %>" placeholder="Ví dụ: Nội Bài (HAN)" required>
+                                        </div>
+
+                                        <!-- Ngày Bay -->
+                                        <div class="mb-3">
+                                            <label for="flydate" class="form-label"><strong>Ngày & Giờ Bay <span class="text-danger">*</span></strong></label>
+                                            <input type="datetime-local" class="form-control" id="flydate" name="flydate" 
+                                                value="<%= new Date(flight.flydate).toISOString().slice(0,16) %>" required>
+                                        </div>
+
+                                        <!-- Giá Vé -->
+                                        <div class="mb-3">
+                                            <label for="price" class="form-label"><strong>Giá Vé (VNĐ) <span class="text-danger">*</span></strong></label>
+                                            <input type="number" class="form-control" id="price" name="price" value="<%= flight.price %>" 
+                                                placeholder="Ví dụ: 1500000" min="0" required>
+                                        </div>
+
+                                        <!-- Tổng Số Ghế -->
+                                        <div class="mb-3">
+                                            <label for="numberseats" class="form-label"><strong>Tổng Số Ghế <span class="text-danger">*</span></strong></label>
+                                            <input type="number" class="form-control" id="numberseats" name="numberseats" value="<%= flight.numberseats %>" 
+                                                placeholder="Ví dụ: 350" min="1" required>
+                                            <small class="text-muted">Số ghế đã đặt: <strong><%= flight.numberseats_pick %></strong> | Ghế còn lại: <strong><%= flight.numberseats - flight.numberseats_pick %></strong></small>
+                                        </div>
+
+                                        <!-- Trạng Thái -->
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label"><strong>Trạng Thái <span class="text-danger">*</span></strong></label>
+                                            <select class="form-select" id="status" name="status" required>
+                                                <option value="active" <% if(flight.status === 'active') { %>selected<% } %>>Hoạt động</option>
+                                                <option value="inactive" <% if(flight.status === 'inactive') { %>selected<% } %>>Ngừng hoạt động</option>
+                                                <option value="delayed" <% if(flight.status === 'delayed') { %>selected<% } %>>Hoãn lại</option>
+                                                <option value="cancelled" <% if(flight.status === 'cancelled') { %>selected<% } %>>Đã hủy</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Thông Tin Hệ Thống -->
+                                        <div class="alert alert-info mb-3" role="alert">
+                                            <p class="mb-1"><small><strong>ID Chuyến Bay:</strong> <%= flight._id %></small></p>
+                                            <p class="mb-0"><small><strong>Ngày tạo:</strong> <%= new Date(flight.createdAt || Date.now()).toLocaleString('vi-VN') %></small></p>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="bi bi-check-circle"></i> Lưu Thay Đổi
+                                            </button>
+                                            <a href="/flight/danhsach" class="btn btn-outline-secondary">
+                                                <i class="bi bi-x-circle"></i> Hủy
+                                            </a>
+                                        </div>
+
+                                        <!-- Danger Zone -->
+                                        <hr class="my-4">
+                                        <div class="alert alert-danger">
+                                            <p class="mb-3 small">Xoá chuyến bay này sẽ xoá tất cả thông tin liên quan.</p>
+                                            <a href="/flight/Xoa/<%= flight._id %>" class="btn btn-danger btn-sm w-100" 
+                                                onclick="return confirm('Bạn có chắc chắn muốn xoá chuyến bay này không?')">
+                                                <i class="bi bi-trash"></i> Xoá Chuyến Bay
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <!-- Non-Admin View - Booking Section -->
+                            <div class="card border-0 shadow-lg">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4"><i class="bi bi-ticket-perforated"></i> Đặt vé</h4>
+
+                                    <!-- Price Display -->
+                                    <div class="p-3 bg-light rounded mb-4 text-center">
+                                        <p class="text-muted small mb-1">Giá vé/khách</p>
+                                        <h2 class="text-danger mb-0">₫ <%= flight.price.toLocaleString('vi-VN') %></h2>
+                                    </div>
+
+                                    <% if (flight.numberseats - flight.numberseats_pick > 0) { %>
+                                        <!-- Booking Form -->
+                                        <form action="/booking/DatVe" method="POST">
+                                            <input type="hidden" name="chuyenbay" value="<%= flight._id %>">
+                                            
+                                            <div class="mb-3">
+                                                <label for="seatsplaced" class="form-label">Số lượng vé</label>
+                                                <input type="number" class="form-control" id="seatsplaced" name="seatsplaced" 
+                                                    min="1" max="<%= flight.numberseats - flight.numberseats_pick %>" 
+                                                    value="1" required>
+                                                <small class="text-muted">Tối đa <%= flight.numberseats - flight.numberseats_pick %> vé</small>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="name" class="form-label">Tên hành khách chính</label>
+                                                <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên của bạn" required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="description" class="form-label">Ghi chú (tùy chọn)</label>
+                                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Ghi chú yêu cầu đặc biệt"></textarea>
+                                            </div>
+
+                                            <div class="mb-4 p-3 bg-light rounded">
+                                                <p class="text-muted small mb-2">Tổng tiền (tạm tính)</p>
+                                                <p class="mb-0"><strong>₫ <span id="totalPrice">
+                                                    <% var total = flight.price; %>
+                                                    <%= total.toLocaleString('vi-VN') %>
+                                                </span></strong></p>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-success w-100 btn-lg">
+                                                <i class="bi bi-bookmark-check"></i> Đặt Vé Ngay
+                                            </button>
+                                        </form>
+                                    <% } else { %>
+                                        <!-- No Seats Available -->
+                                        <div class="alert alert-danger" role="alert">
+                                            <i class="bi bi-exclamation-triangle"></i> Chuyến bay này đã hết vé. Vui lòng chọn chuyến bay khác.
+                                        </div>
+                                        <a href="/flight/danhsach" class="btn btn-primary w-100">
+                                            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <!-- Back Button -->
+                        <div class="mt-3">
+                            <a href="/flight/danhsach" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-arrow-left"></i> Quay lại danh sách chuyến bay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('Footer') %>
+        <%- include('Javascript') %>   
+    </div>
+</body>
+</html>

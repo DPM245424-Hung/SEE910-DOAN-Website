@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/css/Navbar.css" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <title>
+        <%= title %> - Thêm tài khoản cá nhân
+    </title>
+</head>
+
+<body>
+
+    <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
+        <%- include('Navbar') %>
+        
+        <div class="container my-5 flex-grow-1">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h2 class="mb-4">Thêm Tài Khoản Mới</h2>
+                    <form method="POST" action="/account/Them">
+                        <div class="mb-3">
+                            <label for="Tentaikhoan" class="form-label">Tên Tài Khoản</label>
+                            <input type="text" class="form-control" id="Tentaikhoan" name="Tentaikhoan" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="Email" name="Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="MatKhau" class="form-label">Mật Khẩu</label>
+                            <input type="password" class="form-control" id="MatKhau" name="MatKhau" required>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Thêm Tài Khoản</button>
+                            <a href="/account/DanhSach" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <%- include('Footer') %>
+        <%- include('Javascript') %>
+    </div>
+</body>
+
+</html>

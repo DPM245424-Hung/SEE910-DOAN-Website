@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/css/Navbar.css" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <style>
+        /* Seat Map Styles */
+        .seat-map {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .seat-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .row-label {
+            width: 40px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .seat {
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            color: #333;
+        }
+        
+        .seat.available {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .seat.available:hover {
+            background-color: #c8e6c9;
+            transform: scale(1.1);
+        }
+        
+        .seat.booked {
+            background-color: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .seat.selected {
+            background-color: #2196f3;
+            border-color: #1976d2;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+        
+        .seat:disabled {
+            cursor: not-allowed;
+        }
+        
+        .seat-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .legend-item .seat {
+            width: 25px;
+            height: 25px;
+        }
+        
+        .seat-info {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .seat-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
+        <%- include('Navbar') %>
+        
+        <!-- Nội dung đặt vé -->
+        <div class="container mt-5 mb-5 flex-grow-1">
+            <% if(!session.user) { %>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Thông báo!</strong> Vui lòng <a href="/dangnhap" class="alert-link">đăng nhập</a> hoặc <a href="/dangky" class="alert-link">đăng ký</a> để đặt vé.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <div class="row">
+                <!-- Cột bên trái: Thông tin chuyến bay -->
+                <div class="col-lg-4 mb-4">
+                    <h3 class="mb-3">
+                        <i class="bi bi-info-circle"></i> Thông Tin Chuyến Bay
+                    </h3>
+
+                    <% if(flights && flights.length > 0) { %>
+                        <div class="list-group">
+                            <% flights.forEach(function(flight, index) {
+                                const seatsRemaining = flight.numberseats - flight.numberseats_pick;
+                                const flyDate = new Date(flight.flydate);
+                                const dateStr = flyDate.toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                                const timeStr = flyDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                            %>
+                            <div class="list-group-item cursor-pointer" data-flight-id="<%= flight._id %>" data-flight-name="<%= flight.name %>" data-flight-price="<%= flight.price %>" data-flight-seats="<%= flight.numberseats %>" onclick="selectFlight(this)">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1"><strong><%= flight.name %></strong></h6>
+                                        <p class="mb-1 text-muted"><small><%= flight.airline %> - <%= flight.airplane %></small></p>
+                                        <p class="mb-1"><small><strong><%= flight.from_airport %></strong> <i class="bi bi-arrow-right"></i> <strong><%= flight.to_airport %></strong></small></p>
+                                        <p class="mb-1"><small><%= dateStr %> <%= timeStr %></small></p>
+                                        <% if(seatsRemaining > 0) { %>
+                                            <span class="badge bg-success"><%= seatsRemaining %> ghế</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger">Hết chỗ</span>
+                                        <% } %>
+                                    </div>
+                                    <div class="text-end">
+                                        <p class="text-primary fw-bold"><%= flight.price.toLocaleString('vi-VN') %> ₫</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="alert alert-info">Không có chuyến bay nào khả dụng</div>
+                    <% } %>
+                </div>
+
+                <!-- Cột bên phải: Form đặt vé -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-bag-check"></i> Thông Tin Đặt Vé
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="bookingForm" action="/booking/DatVe" method="POST">
+                                <!-- Chuyến bay đã chọn -->
+                                <div class="mb-3">
+                                    <label for="flightSelect" class="form-label">
+                                        <strong>Chuyến Bay <span class="text-danger">*</span></strong>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="flightDisplay" placeholder="Chọn chuyến bay từ danh sách" readonly>
+                                        <input type="hidden" name="chuyenbay" id="flightSelect" required>
+                                    </div>
+                                    <small class="text-muted">Giá: <strong id="flightPrice">0</strong> ₫</small>
+                                </div>
+
+                                <hr>
+
+                                <!-- Thông tin hành khách -->
+                                <h6 class="mb-3"><i class="bi bi-person"></i> <strong>Thông Tin Hành Khách</strong></h6>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="name" class="form-label">
+                                            Họ và Tên <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="name" name="Hoten" placeholder="Nhập họ và tên" required value="<%= session.user ? session.user.name : '' %>">
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label">
+                                            Số Điện Thoại <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại" required value="<%= session.user ? session.user.phone : '' %>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="identification" class="form-label">
+                                            CMND/Hộ Chiếu <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="identification" name="identification" placeholder="Nhập CMND hoặc Hộ Chiếu" required>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- Chọn ghế -->
+                                <h6 class="mb-3"><i class="bi bi-door-closed"></i> <strong>Chọn Ghế</strong></h6>
+
+                                <!-- Bản đồ ghế -->
+                                <div id="seatMapContainer" class="mb-3">
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle"></i> Vui lòng chọn chuyến bay trước để xem bản đồ ghế
+                                    </div>
+                                </div>
+
+                                <!-- Nút điều khiển ghế -->
+                                <div class="mb-3 d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="clearAllSeats()">
+                                        <i class="bi bi-x-circle"></i> Xóa Chọn
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-info" onclick="autoSelectSeats(1)">
+                                        <i class="bi bi-check-circle"></i> Tự Động (1 Ghế)
+                                    </button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="seatSelect" class="form-label">
+                                        Ghế Đã Chọn <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="seatSelect" name="seatsplaced" placeholder="Ghế sẽ hiển thị ở đây khi chọn" readonly required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">
+                                        Ghi Chú
+                                    </label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Nhập ghi chú (nếu có)"></textarea>
+                                </div>
+
+                                <hr>
+
+                                <!-- Tóm tắt giá -->
+                                <div class="alert alert-light border">
+                                    <h6 class="mb-3"><i class="bi bi-cash-coin"></i> <strong>Tóm Tắt Giá</strong></h6>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Giá vé (1 hành khách):</span>
+                                        <span id="unitPrice">0 ₫</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Số hành khách:</span>
+                                        <span id="passengerCount">1</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                                        <strong>Tổng Tiền:</strong>
+                                        <strong class="text-primary fs-5" id="totalPrice">0 ₫</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Input ẩn cho price -->
+                                <input type="hidden" name="price" id="priceInput">
+                                <input type="hidden" name="datebooking" id="dateInput">
+                                <% if(session.user) { %>
+                                    <input type="hidden" name="taikhoan" value="<%= session.user._id %>">
+                                <% } %>
+
+                                <!-- Buttons -->
+                                <div class="d-grid gap-2">
+                                    <% if(session.user) { %>
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="bi bi-bag-check"></i> Xác Nhận Đặt Vé
+                                        </button>
+                                    <% } else { %>
+                                        <a href="/dangnhap" class="btn btn-primary btn-lg">
+                                            <i class="bi bi-box-arrow-in-right"></i> Đăng Nhập Để Tiếp Tục
+                                        </a>
+                                        <a href="/dangky" class="btn btn-outline-primary btn-lg">
+                                            <i class="bi bi-person-plus"></i> Hoặc Đăng Ký Tài Khoản Mới
+                                        </a>
+                                    <% } %>
+                                    <a href="/flight" class="btn btn-outline-secondary btn-lg">
+                                        <i class="bi bi-arrow-left"></i> Quay Lại Danh Sách Chuyến Bay
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('Footer') %>
+        <%- include('Javascript') %>
+    </div>
+
+    <script src="/js/setting_flight.js"></script>
+    <script>
+        function selectFlight(element) {
+            // Xóa class active từ tất cả các item
+            document.querySelectorAll('.list-group-item').forEach(item => {
+                item.classList.remove('active', 'bg-light');
+            });
+            
+            // Thêm class active vào item được chọn
+            element.classList.add('active', 'bg-light');
+            
+            // Lấy thông tin chuyến bay
+            const flightId = element.getAttribute('data-flight-id');
+            const flightName = element.getAttribute('data-flight-name');
+            const flightPrice = parseInt(element.getAttribute('data-flight-price'));
+            const totalSeats = parseInt(element.getAttribute('data-flight-seats')) || 350;
+            
+            // Cập nhật form
+            document.getElementById('flightSelect').value = flightId;
+            document.getElementById('flightDisplay').value = flightName;
+            document.getElementById('flightPrice').textContent = flightPrice.toLocaleString('vi-VN');
+            document.getElementById('priceInput').value = flightPrice;
+            
+            // Cập nhật tổng tiền
+            updateTotalPrice(flightPrice);
+            
+            // Set ngày đặt vé
+            const now = new Date();
+            document.getElementById('dateInput').value = now.toISOString();
+            
+            // Khởi tạo bản đồ ghế với tổng số ghế từ chuyến bay được chọn
+            initSeatMap(totalSeats, 'seatMapContainer', '');
+            
+            // Xóa ghế được chọn trước đó
+            document.getElementById('seatSelect').value = '';
+            
+            // Cuộn xuống form
+            document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateTotalPrice(unitPrice) {
+            const seatCount = document.getElementById('seatSelect').value.split(',').filter(s => s.trim()).length || 1;
+            const totalPrice = unitPrice * seatCount;
+            
+            document.getElementById('unitPrice').textContent = unitPrice.toLocaleString('vi-VN') + ' ₫';
+            document.getElementById('passengerCount').textContent = seatCount;
+            document.getElementById('totalPrice').textContent = totalPrice.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        // Cập nhật tổng tiền khi thay đổi ghế
+        document.getElementById('seatSelect').addEventListener('change', function() {
+            const flightPrice = parseInt(document.getElementById('priceInput').value) || 0;
+            updateTotalPrice(flightPrice);
+        });
+
+        // Validate form trước khi submit
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            if(!document.getElementById('flightSelect').value) {
+                e.preventDefault();
+                alert('Vui lòng chọn chuyến bay');
+                return false;
+            }
+            
+            if(!document.getElementById('seatSelect').value) {
+                e.preventDefault();
+                alert('Vui lòng chọn ghế');
+                return false;
+            }
+        });
+    </script>
+
+</body>
+
+</html>

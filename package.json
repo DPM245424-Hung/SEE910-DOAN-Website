@@ -1,0 +1,22 @@
+{
+  "name": "doandpm245424",
+  "version": "1.0.0",
+  "description": "Do An mon Dien toan dam may(SEE910) cua Nguyen Tan Hung Dpm245424",
+  "license": "ISC",
+  "author": "Nguyen Tan Hung",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon index.js"
+  },
+  "dependencies": {
+    "axios": "^1.14.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.0",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.4.1",
+    "nodemon": "^3.1.14"
+  }
+}
