@@ -3,7 +3,7 @@ var app = express()
 var session = require('express-session');
 var mongoose = require('mongoose');
 var path = require('path');
-app.use(express.static(path.join(__dirname, 'Public')));
+app.use(express.static(path.join(__dirname, 'StaticFile')));
 
 
 var URI = 'mongodb://Hung:hungvn1234@ac-abp0quy-shard-00-02.9g2z1dq.mongodb.net:27017/airblinnk?ssl=true&authSource=admin';
