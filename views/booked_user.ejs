@@ -179,7 +179,7 @@
                     </div>
                 <% } %>
 
-                <!-- Pagination (nếu cần) -->
+                <!-- lật trang -->
                 <% if (tickets && tickets.length > 10) { %>
                     <nav aria-label="Page navigation" class="mt-5">
                         <ul class="pagination justify-content-center">
@@ -197,7 +197,7 @@
         <%- include('Javascript') %>   
 
         <script>
-            // Hàm tìm kiếm
+            // tìm kiếm
             document.getElementById('searchInput')?.addEventListener('keyup', function(e) {
                 const searchValue = e.target.value.toLowerCase();
                 const rows = document.querySelectorAll('.ticket-row');
@@ -220,7 +220,7 @@
                 });
             });
 
-            // Hàm xác nhận hủy vé
+            //  hủy vé
             function confirmCancel(ticketId) {
                 if (confirm('Bạn có chắc chắn muốn hủy vé này không?')) {
                     // Gửi request hủy vé

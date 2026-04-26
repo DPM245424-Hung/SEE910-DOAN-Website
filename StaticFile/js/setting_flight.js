@@ -1,9 +1,8 @@
 /**
- * Hàm tính toán vị trí ngồi cho máy bay
+ * Hàm tính toán vị trí ngồi 
  * @param {number} totalSeats - Tổng số ghế trên máy bay
- * @param {array} bookedSeats - Danh sách ghế đã đặt (mảng)
- * @returns {object} - Chứa available và booked seats
- */
+ * @param {array} bookedSeats - Danh sách ghế đã đặt
+ * @returns {object} - Chứa available và booked seats */
 function generateSeatMap(totalSeats, bookedSeatsString = '') {
     const bookedArray = bookedSeatsString 
         ? bookedSeatsString.split(',').map(s => s.trim().toUpperCase()) 
@@ -45,9 +44,9 @@ function generateSeatMap(totalSeats, bookedSeatsString = '') {
 }
 
 /**
- * Hàm hiển thị bản đồ ghế (HTML)
+ * hiển thị bản đồ ghế
  * @param {number} totalSeats - Tổng số ghế
- * @param {string} bookedSeatsString - Chuỗi ghế đã đặt (phân cách bằng dấu phẩy)
+ * @param {string} bookedSeatsString - Chuỗi ghế đã đặt
  * @returns {string} - HTML của bản đồ ghế
  */
 function renderSeatMap(totalSeats, bookedSeatsString = '') {
@@ -60,7 +59,6 @@ function renderSeatMap(totalSeats, bookedSeatsString = '') {
     
     for (let i = 0; i < map.seats.length; i++) {
         const seat = map.seats[i];
-        
         // Nếu đổi hàng, đóng hàng cũ và mở hàng mới
         if (seat.row !== currentRow) {
             if (currentRow > 0) {

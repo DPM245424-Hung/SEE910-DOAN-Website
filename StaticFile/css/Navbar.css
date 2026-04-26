@@ -1,6 +1,4 @@
-/* ===== NAVBAR STYLING ===== */
 
-/* Navbar Main */
 .navbar {
     padding: 0.75rem 0;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Chuyển động mượt hơn */
@@ -26,7 +24,6 @@
     transform: scale(1.05);
 }
 
-/* Navbar Links */
 .navbar-nav .nav-link {
     color: #4a4a4a !important;
     font-weight: 500;
@@ -47,8 +44,7 @@
     color: #b9cf3c !important;
     background-color: #2525259e;
 }
-
-/* Icons in Navbar */
+/* icon */
 .navbar-nav .nav-link i {
     font-size: 1.1rem;
     transition: all 0.3s ease;
@@ -58,7 +54,7 @@
     transform: scale(1.15);
 }
 
-/* Dropdown Menu */
+/* Dropdown */
 .dropdown-menu {
     position: absolute;
     margin-top: 8px !important; 
@@ -96,7 +92,7 @@
     color: #0b5ed7;
 }
 
-/* Dropdown Icon Animation */
+/* Dropdown Icon */
 .dropdown-toggle::after {
     transition: transform 0.3s ease;
 }
@@ -105,7 +101,7 @@
     transform: rotate(180deg);
 }
 
-/* Navbar Toggler (Mobile) */
+/* Navbar mobile */
 .navbar-toggler {
     border: none;
     padding: 0.5rem 0.75rem;
@@ -120,7 +116,7 @@
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23333' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* Collapsed Navigation */
+/* */
 .collapse.show {
     animation: expandNav 0.3s ease;
 }
@@ -136,7 +132,7 @@
     }
 }
 
-/* ===== NAVBAR ADMIN STYLING ===== */
+/* ADMIN */
 
 .navbar.navbar-admin {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
@@ -179,7 +175,7 @@
     color: #ffffff;
 }
 
-/* ===== NAVBAR USER STYLING ===== */
+/*  USER */
 
 .navbar.navbar-user {
     border-bottom: 2px solid #f0f6ff;
@@ -206,7 +202,7 @@
     transform: scaleX(1);
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+/* RESPON */
 
 @media (max-width: 992px) {
     .navbar {
@@ -300,7 +296,7 @@
         margin-top: 0;
     }
 }
-/* ===== ANIMATION UTILITIES ===== */
+/* UTILITIES ANIMATION */
 
 .nav-link-animation {
     position: relative;
