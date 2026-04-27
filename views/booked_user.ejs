@@ -10,7 +10,6 @@
     <title><%= title %> - Danh sách vé đã đặt </title>
 </head>
 <body>
-
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
         
@@ -66,6 +65,9 @@
                                         <th style="width: 15%">
                                             <i class="bi bi-cash me-2"></i>Giá vé
                                         </th>
+                                        <th style="width: 12%">
+                                            <i class="bi bi-info-circle me-2"></i>Trạng thái
+                                        </th>
                                         <th style="width: 20%">Mô tả</th>
                                         <th style="width: 23%; text-align: center;">Hành động</th>
                                     </tr>
@@ -73,7 +75,7 @@
                                 <tbody id="ticketTableBody">
                                     <% tickets.forEach(ticket => { %>
                                         <% if (ticket.chuyenbay) { %>
-                                        <tr class="ticket-row" data-ticket-name="<%= ticket.chuyenbay.name.toLowerCase() %>">
+                                        <tr class="ticket-row" data-ticket-name="<%= ticket.chuyenbay.name.toLowerCase() %>" data-flydate="<%= ticket.chuyenbay.flydate %>">
                                             <td>
                                                 <strong><%= ticket.chuyenbay.name %></strong>
                                             </td>
@@ -90,17 +92,22 @@
                                                 <strong class="text-success"><%= ticket.price.toLocaleString('vi-VN') %> ₫</strong>
                                             </td>
                                             <td>
+                                                <span class="flight-status badge" data-flydate="<%= ticket.chuyenbay.flydate %>">
+                                                    <!-- Trạng thái sẽ được cập nhật bằng JavaScript -->
+                                                </span>
+                                            </td>
+                                            <td>
                                                 <small class="text-muted">
                                                     <%= ticket.description ? ticket.description.substring(0, 30) + '...' : 'Không có' %>
                                                 </small>
                                             </td>
                                             <td class="text-center">
-                                                <div class="btn-group btn-group-sm" role="group">
+                                                <div class="btn-group btn-group-sm flight-actions" role="group" data-ticket-id="<%= ticket._id %>">
                                                     <a href="/booking/detail_ticket/<%= ticket._id %>" class="btn btn-outline-primary" 
                                                        title="Xem chi tiết">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
-                                                    <button class="btn btn-outline-danger" onclick="confirmCancel('<%= ticket._id %>')" 
+                                                    <button class="btn btn-outline-danger btn-cancel-ticket" onclick="confirmCancel('<%= ticket._id %>')" 
                                                             title="Hủy vé">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
@@ -119,7 +126,7 @@
                         <div class="row" id="ticketCardsContainer">
                             <% tickets.forEach(ticket => { %>
                                 <% if (ticket.chuyenbay) { %>
-                                <div class="col-12 mb-4 ticket-card" data-ticket-name="<%= ticket.chuyenbay.name.toLowerCase() %>">
+                                <div class="col-12 mb-4 ticket-card" data-ticket-name="<%= ticket.chuyenbay.name.toLowerCase() %>" data-ticket-id="<%= ticket._id %>">
                                     <div class="card border-0 shadow-sm h-100">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -131,6 +138,12 @@
                                                     </p>
                                                 </div>
                                                 <span class="badge bg-success"><%= ticket.price.toLocaleString('vi-VN') %> ₫</span>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <span class="flight-status-mobile badge" data-flydate="<%= ticket.chuyenbay.flydate %>">
+                                                    <!-- Trạng thái sẽ được cập nhật bằng JavaScript -->
+                                                </span>
                                             </div>
 
                                             <div class="mb-3 pb-3 border-bottom">
@@ -154,7 +167,7 @@
                                                 <a href="/booking/detail_ticket/<%= ticket._id %>" class="btn btn-sm btn-outline-primary">
                                                     <i class="bi bi-eye me-1"></i>Xem chi tiết
                                                 </a>
-                                                <button class="btn btn-sm btn-outline-danger" onclick="confirmCancel('<%= ticket._id %>')">
+                                                <button class="btn btn-sm btn-outline-danger btn-cancel-ticket-mobile" onclick="confirmCancel('<%= ticket._id %>')">
                                                     <i class="bi bi-trash me-1"></i>Hủy Vé
                                                 </button>
                                             </div>
@@ -196,7 +209,12 @@
         <%- include('Footer') %>
         <%- include('Javascript') %>   
 
+        <script src="/js/status.js"></script>
         <script>
+            // Chạy lần đầu khi trang tải
+            document.addEventListener('DOMContentLoaded', function() {
+                initFlightStatusUpdater(updateTicketStatuses);
+            });
             // tìm kiếm
             document.getElementById('searchInput')?.addEventListener('keyup', function(e) {
                 const searchValue = e.target.value.toLowerCase();
@@ -222,6 +240,21 @@
 
             //  hủy vé
             function confirmCancel(ticketId) {
+                // Kiểm tra xem vé có khả dụng không
+                const ticket = document.querySelector(`[data-ticket-id="${ticketId}"]`);
+                if (ticket) {
+                    const statusBadge = ticket.querySelector('.flight-status, .flight-status-mobile');
+                    if (statusBadge) {
+                        const flyDate = statusBadge.getAttribute('data-flydate');
+                        const statusInfo = getFlightStatus(flyDate);
+                        
+                        if (!statusInfo.isAvailable) {
+                            alert('Chuyến bay này không còn khả dụng để hủy. Nó đang bay hoặc đã hạ cánh.');
+                            return;
+                        }
+                    }
+                }
+                
                 if (confirm('Bạn có chắc chắn muốn hủy vé này không?')) {
                     // Gửi request hủy vé
                     window.location.href = '/booking/HuyVe/' + ticketId;

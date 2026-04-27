@@ -11,45 +11,42 @@
     <link rel="stylesheet" href="/css/background.css" />
 </head>
 <body>
-
+    <div class="input-bg" style="--input: url('/image/flight.jpg');">
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
+        <div class="container mt-5 mb-2 flex-grow-1 bg transparent"></div>
         <div class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
             <div class="card shadow" style="width: 100%; max-width: 450px; border-radius: 15px;">
                 <div class="card-body p-5">
-                    <h2 class="text-center mb-4 fw-bold">Đăng Ký</h2>
-                    
+                    <h2 class="text-center mb-6 fw-bold">Đăng Ký</h2>
                     <form action="/dangky" method="post" class="needs-validation" novalidate>
                         <!-- Tên tài khoản -->
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <label for="tentaikhoan" class="form-label">Tên tài khoản</label>
                             <input type="text" class="form-control" id="tentaikhoan" name="Tentaikhoan" required placeholder="Nhập tên tài khoản">
                             <div class="invalid-feedback">Vui lòng nhập tên tài khoản.</div>
                         </div>
-
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" name="Email" required placeholder="Nhập địa chỉ email">
                             <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
                         </div>
 
                         <!-- Mật khẩu -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="matkhau" class="form-label">Mật khẩu</label>
                             <input type="password" class="form-control" id="matkhau" name="MatKhau" required 
                                    placeholder="Nhập mật khẩu" minlength="6">
                             <div class="invalid-feedback">Vui lòng nhập mật khẩu (tối thiểu 6 ký tự).</div>
-                            <small class="form-text text-muted d-block mt-2">Mật khẩu phải có ít nhất 6 ký tự.</small>
+                            
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="xacnhanmatkhau" class="form-label">Xác nhận mật khẩu</label>
                             <input type="password" class="form-control" id="xacnhanmatkhau" name="XacNhanMatKhau" required 
                                    placeholder="Nhập lại mật khẩu" minlength="6">
                             <div class="invalid-feedback" id="passwordMatchFeedback">Vui lòng xác nhận mật khẩu.</div>
-                            <small class="form-text text-muted d-block mt-2" id="passwordMatch" style="color: #6c757d !important;">
-                                Mật khẩu chưa trùng khớp
-                            </small>
+
                         </div>
 
                         <!-- Nút Đăng ký -->
@@ -64,7 +61,8 @@
                     </div>
                 </div>
             </div>
-        </div>  
+        </div> 
+    </div> 
         <script>
             // Kiểm tra mật khẩu trùng khớp
             const matkhauInput = document.getElementById('matkhau');

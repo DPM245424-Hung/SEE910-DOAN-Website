@@ -4,6 +4,7 @@
 <head>
     <link rel="stylesheet" href="/css/Navbar.css" />
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/background.css" />
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,9 +14,8 @@
         <%= title %> - Chuyến bay
     </title>
 </head>
-
 <body>
-
+    <div class="input-bg" style="--input: url('/image/BLUE-GRADIENT.jpg');">
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
             <header class="hero">
@@ -43,8 +43,6 @@
                                     <th class="text-center">Từ - Đến</th>
                                     <th class="text-center">Ngày Bay</th>
                                     <th class="text-center">Giá (VNĐ)</th>
-                                    <th class="text-center">Ghế Còn Lại</th>
-                                    <th class="text-center">Trạng Thái</th>
                                     <th class="text-center">Hành Động</th>
                                 </tr>
                             </thead>
@@ -82,22 +80,6 @@
                                             </strong>
                                         </td>
                                         <td class="text-center">
-                                            <% if(seatsRemaining> 0) { %>
-                                                <span class="badge bg-success">
-                                                    <%= seatsRemaining %> ghế
-                                                </span>
-                                                <% } else { %>
-                                                    <span class="badge bg-danger">Hết chỗ</span>
-                                                    <% } %>
-                                        </td>
-                                        <td class="text-center">
-                                            <% if(seatsRemaining> 0 && flight.status === 'active') { %>
-                                                <span class="badge bg-info">Có sẵn</span>
-                                                <% } else { %>
-                                                    <span class="badge bg-secondary">Không khả dụng</span>
-                                                    <% } %>
-                                        </td>
-                                        <td class="text-center">
                                             <% if(seatsRemaining> 0 && flight.status === 'active' || flight.status ===
                                                 'Hoạt động') { %>
                                                 <% if(session.user) { %>
@@ -132,7 +114,7 @@
             <%- include('Footer') %>
                 <%- include('Javascript') %>
     </div>
-
+    </div>
     <script>
         function redirectToSignUp() {
             if (confirm('Bạn cần đăng ký tài khoản để đặt vé. Bạn có muốn đăng ký ngay không?')) {

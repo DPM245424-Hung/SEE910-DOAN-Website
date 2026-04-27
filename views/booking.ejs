@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="/css/Navbar.css" />
+    <link rel="stylesheet" href="/css/background.css" />
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -144,18 +145,23 @@
                                 const dateStr = flyDate.toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
                                 const timeStr = flyDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
                             %>
-                            <div class="list-group-item cursor-pointer" data-flight-id="<%= flight._id %>" data-flight-name="<%= flight.name %>" data-flight-price="<%= flight.price %>" data-flight-seats="<%= flight.numberseats %>" onclick="selectFlight(this)">
+                            <div class="list-group-item cursor-pointer flight-item" data-flight-id="<%= flight._id %>" data-flight-name="<%= flight.name %>" data-flight-price="<%= flight.price %>" data-flight-seats="<%= flight.numberseats %>" data-flight-seats-picked="<%= flight.numberseats_pick %>" data-flydate="<%= flight.flydate %>" onclick="selectFlight(this)">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <h6 class="mb-1"><strong><%= flight.name %></strong></h6>
                                         <p class="mb-1 text-muted"><small><%= flight.airline %> - <%= flight.airplane %></small></p>
                                         <p class="mb-1"><small><strong><%= flight.from_airport %></strong> <i class="bi bi-arrow-right"></i> <strong><%= flight.to_airport %></strong></small></p>
                                         <p class="mb-1"><small><%= dateStr %> <%= timeStr %></small></p>
-                                        <% if(seatsRemaining > 0) { %>
-                                            <span class="badge bg-success"><%= seatsRemaining %> ghế</span>
-                                        <% } else { %>
-                                            <span class="badge bg-danger">Hết chỗ</span>
-                                        <% } %>
+                                        <div>
+                                            <% if(seatsRemaining > 0) { %>
+                                                <span class="badge bg-success"><%= seatsRemaining %> ghế</span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger">Hết chỗ</span>
+                                            <% } %>
+                                            <span class="flight-status-badge-booking badge" data-flydate="<%= flight.flydate %>">
+                                                <!-- Trạng thái sẽ được cập nhật bằng JavaScript -->
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="text-end">
                                         <p class="text-primary fw-bold"><%= flight.price.toLocaleString('vi-VN') %> ₫</p>
@@ -311,10 +317,25 @@
         <%- include('Javascript') %>
     </div>
 
+    <script src="/js/status.js"></script>
     <script src="/js/setting_flight.js"></script>
     <script>
+        // Chạy khi trang tải
+        document.addEventListener('DOMContentLoaded', function() {
+            initFlightStatusUpdater(updateBookingFlightStatuses);
+        });
+
         function selectFlight(element) {
-            // Xóa class active từ tất cả các item
+            // Kiểm tra xem chuyến bay có khả dụng không
+            const flyDate = element.getAttribute('data-flydate');
+            const statusInfo = getFlightStatus(flyDate);
+            
+            if (!statusInfo.isAvailable) {
+                alert('Chuyến bay này không còn khả dụng để đặt vé. Nó ' + (statusInfo.status === 'Đang Bay' ? 'đang cất cánh' : 'đã hạ cánh') + '.');
+                return;
+            }
+            
+            // Xóa class active từ tất cả các ghế
             document.querySelectorAll('.list-group-item').forEach(item => {
                 item.classList.remove('active', 'bg-light');
             });
@@ -341,13 +362,30 @@
             const now = new Date();
             document.getElementById('dateInput').value = now.toISOString();
             
-            // Khởi tạo bản đồ ghế với tổng số ghế từ chuyến bay được chọn
-            initSeatMap(totalSeats, 'seatMapContainer', '');
+            // Tạo dữ liệu ghế đã được đặt
+            // Lấy số ghế đã đặt từ chuyến bay được chọn
+            const totalSeatsBooked = parseInt(element.getAttribute('data-flight-seats-picked')) || 0;
             
-            // Xóa ghế được chọn trước đó
+            // Tạo danh sách ghế đã đặt (mẫu)
+            const bookedSeats = [];
+            if (totalSeatsBooked > 0) {
+                // Tạo các ghế đã đặt từ A1 đến hết số ghế đã đặt
+                const columns = ['A', 'B', 'C', 'D', 'E', 'F'];
+                for (let i = 0; i < totalSeatsBooked; i++) {
+                    const row = Math.floor(i / 6) + 1;
+                    const col = columns[i % 6];
+                    bookedSeats.push(col + row);
+                }
+            }
+            const bookedSeatsString = bookedSeats.join(', ');
+            
+            // Khởi tạo bản đồ ghế với tổng số ghế từ chuyến bay được chọn
+            initSeatMap(totalSeats, 'seatMapContainer', bookedSeatsString);
+            
+            // Xóa ghế được chọn
             document.getElementById('seatSelect').value = '';
             
-            // Cuộn xuống form
+            // Cuộn form
             document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
         }
 

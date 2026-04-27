@@ -12,15 +12,12 @@
         <%= title %> - Chi Tiết Vé
     </title>
 </head>
-
 <body>
-
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
         
         <div class="flex-grow-1 py-5">
             <div class="container">
-                <!-- Breadcrumb -->
                 <nav aria-label="breadcrumb" class="mb-4">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
@@ -51,7 +48,7 @@
                                 </div>
 
                                 <div class="card-body">
-                                    <!-- Thông tin chuyến bay chính -->
+                                    <!-- Thông tin -->
                                     <div class="mb-4">
                                         <h5 class="mb-3">
                                             <i class="bi bi-airplane"></i> Thông Tin Chuyến Bay
@@ -74,11 +71,9 @@
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-1">Trạng Thái</p>
                                                 <p class="fw-bold">
-                                                    <% if (ticket.chuyenbay.status === 'active') { %>
-                                                        <span class="badge bg-success">Có sẵn</span>
-                                                    <% } else { %>
-                                                        <span class="badge bg-warning"><%= ticket.chuyenbay.status %></span>
-                                                    <% } %>
+                                                    <span class="flight-status-detail badge" data-flydate="<%= ticket.chuyenbay.flydate %>">
+                                                        <!-- Trạng thái sẽ được cập nhật bằng JavaScript -->
+                                                    </span>
                                                 </p>
                                             </div>
                                         </div>
@@ -86,7 +81,7 @@
 
                                     <hr>
 
-                                    <!-- Lộ trình chuyến bay -->
+                                    <!-- Lộ trình -->
                                     <div class="mb-4">
                                         <h5 class="mb-3">
                                             <i class="bi bi-geo-alt-fill"></i> Lộ Trình
@@ -251,6 +246,17 @@
 
                                     <hr>
 
+                                    <div class="mb-3">
+                                        <p class="text-muted small mb-1">Trạng Thái Chuyến Bay</p>
+                                        <p class="fw-bold mb-0">
+                                            <span class="flight-status-summary badge" data-flydate="<%= ticket.chuyenbay.flydate %>">
+                                                <!-- Trạng thái sẽ được cập nhật bằng JavaScript -->
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    <hr>
+
                                     <div class="mb-4">
                                         <p class="text-muted small mb-1">Giá Vé</p>
                                         <p class="fw-bold fs-5 text-success mb-0">
@@ -262,7 +268,7 @@
                                         <a href="/booking/DanhSachDatVe" class="btn btn-outline-primary">
                                             <i class="bi bi-arrow-left me-1"></i> Quay Lại
                                         </a>
-                                        <button class="btn btn-danger" onclick="cancelTicket('<%= ticket._id %>')">
+                                        <button class="btn btn-danger ticket-cancel-btn" onclick="cancelTicket('<%= ticket._id %>')" data-flydate="<%= ticket.chuyenbay.flydate %>">
                                             <i class="bi bi-trash me-1"></i> Hủy Vé
                                         </button>
                                     </div>
@@ -291,8 +297,22 @@
         <%- include('Javascript') %>
     </div>
 
+    <script src="/js/status.js"></script>
     <script>
+        // Chạy khi trang tải
+        document.addEventListener('DOMContentLoaded', function() {
+            initFlightStatusUpdater(updateDetailFlightStatus);
+        });
+
         function cancelTicket(ticketId) {
+            const flyDate = document.querySelector('[data-flydate]').getAttribute('data-flydate');
+            const statusInfo = getFlightStatus(flyDate);
+            
+            if (!statusInfo.isAvailable) {
+                alert('Chuyến bay này không còn khả dụng. Không thể hủy vé khi ' + (statusInfo.status === 'Đang Bay' ? 'chuyến bay đang cất cánh' : 'chuyến bay đã hạ cánh') + '.');
+                return;
+            }
+            
             if (confirm('Bạn có chắc chắn muốn hủy vé này không? Vé sẽ được hoàn tiền.')) {
                 window.location.href = '/booking/HuyVe/' + ticketId;
             }

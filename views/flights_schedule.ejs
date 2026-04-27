@@ -11,6 +11,7 @@
     <title>
         <%= title %> - Chuyến bay 
     </title>
+    <link rel="stylesheet" href="/css/background.css" />
 </head>
 
 <body>
@@ -55,7 +56,7 @@
                                 const dateStr = flyDate.toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
                                 const timeStr = flyDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
                             %>
-                            <tr>
+                            <tr class="flight-row" data-flydate="<%= flight.flydate %>" data-flight-id="<%= flight._id %>">
                                 <td class="text-center"><strong><%= flight.name %></strong></td>
                                 <td class="text-center"><%= flight.airline %></td>
                                 <td class="text-center"><%= flight.airplane %></td>
@@ -77,25 +78,23 @@
                                     <% } %>
                                 </td>
                                 <td class="text-center">
-                                    <% if(seatsRemaining > 0  && flight.status === 'active') { %>
-                                        <span class="badge bg-info">Có sẵn</span>
-                                    <% } else { %>
-                                        <span class="badge bg-secondary">Không khả dụng</span>
-                                    <% } %>
+                                    <span class="flight-status-badge badge" data-flydate="<%= flight.flydate %>">
+                                        <!-- Trạng thái sẽ được cập nhật bằng JavaScript -->
+                                    </span>
                                 </td>
                                 <td class="text-center">
-                                    <% if(seatsRemaining > 0 && flight.status === 'active' || flight.status === 'Hoạt động') { %>
+                                    <% if(seatsRemaining > 0 && flight.status === 'active') { %>
                                         <% if(session.user) { %>
-                                            <a href="/booking?flightId=<%= flight._id %>" class="btn btn-sm btn-primary">
+                                            <a href="/booking?flightId=<%= flight._id %>" class="btn btn-sm btn-primary flight-action-btn">
                                                 <i class="bi bi-bag-check"></i> Đặt Vé
                                             </a>
                                         <% } else { %>
-                                            <button class="btn btn-sm btn-warning" onclick="redirectToSignUp()">
+                                            <button class="btn btn-sm btn-warning flight-action-btn" onclick="redirectToSignUp()">
                                                 <i class="bi bi-person-plus"></i> Đăng Ký
                                             </button>
                                         <% } %>
                                     <% } else { %>
-                                        <button class="btn btn-sm btn-secondary" disabled>
+                                        <button class="btn btn-sm btn-secondary flight-action-btn" disabled>
                                             Không có sẵn
                                         </button>
                                     <% } %>
@@ -116,6 +115,7 @@
         <%- include('Javascript') %>
     </div>
 
+    <script src="/js/status.js"></script>
     <script>
         function redirectToSignUp() {
             if(confirm('Bạn cần đăng ký tài khoản để đặt vé. Bạn có muốn đăng ký ngay không?')) {
@@ -125,6 +125,9 @@
 
         // BẮT ĐẦU: Xử lý logic tìm kiếm trực tiếp trên bảng
         document.addEventListener('DOMContentLoaded', function() {
+            // Cập nhật trạng thái chuyến bay
+            initFlightStatusUpdater(updateFlightStatuses);
+            
             const searchInput = document.getElementById('searchInput');
             const tableBody = document.getElementById('flightTableBody');
 
