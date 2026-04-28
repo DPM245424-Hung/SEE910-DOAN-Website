@@ -35,6 +35,13 @@
                             <label for="MatKhau" class="form-label">Mật Khẩu</label>
                             <input type="password" class="form-control" id="MatKhau" name="MatKhau" placeholder="Để trống nếu không đổi">
                         </div>
+                        <div class="mb-3">
+                            <label for="quyenhan" class="form-label">Quyền Hạn</label>
+                            <select class="form-control" id="quyenhan" name="quyenhan">
+                                <option value="user" <%= account.quyenhan === 'user' ? 'selected' : '' %>>Người Dùng</option>
+                                <option value="admin" <%= account.quyenhan === 'admin' ? 'selected' : '' %>>Quản Trị Viên</option>
+                            </select>
+                        </div>
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
                             <a href="/account/DanhSach" class="btn btn-secondary">Hủy</a>

@@ -18,6 +18,17 @@
     <div class="input-bg" style="--input: url('/image/BLUE-GRADIENT.jpg');">
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
+            <% if(session.user) { %>
+            <header class="hero">
+                <div class="overlay">
+                    <div class="content">
+                        <h1>Khởi đầu hành trình của bạn</h1>
+                        <p>Khám phá những vùng đất mới với dịch vụ bay chuyên nghiệp và đẳng cấp nhất.</p>
+                        <a href="/flight" class="btn">Đặt vé Ngay!</a>
+                    </div>
+                </div>
+            </header>
+            <%}else {%>
             <header class="hero">
                 <div class="overlay">
                     <div class="content">
@@ -27,6 +38,7 @@
                     </div>
                 </div>
             </header>
+            <%}%>
             <div class="container mt-5 mb-5 flex-grow-1">
                 <h1 class="mb-4 text-center">
                     <i class="bi bi-airplane"></i> Các Chuyến Bay nổi bất gần đây

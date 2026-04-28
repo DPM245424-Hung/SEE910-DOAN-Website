@@ -415,21 +415,12 @@
             // Tạo danh sách ghế đã đặt (mẫu)
             const bookedSeats = [];
             if (totalSeatsBooked > 0) {
-                if (totalSeatsBooked > 250) {
-                    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-                    for (let i = 0; i < totalSeatsBooked; i++) {
-                        const row = Math.floor(i / 9) + 1;
-                        const col = columns[i % 9];
-                        bookedSeats.push(col + row);
-                    }
-                } else {
                     const columns = ['A', 'B', 'C', 'D', 'E', 'F'];
                     for (let i = 0; i < totalSeatsBooked; i++) {
                         const row = Math.floor(i / 6) + 1;
                         const col = columns[i % 6];
                         bookedSeats.push(col + row);
                     }
-                }
             }
             const bookedSeatsString = bookedSeats.join(', ');
 

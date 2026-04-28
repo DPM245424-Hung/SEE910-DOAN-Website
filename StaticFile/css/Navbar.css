@@ -67,16 +67,6 @@ body {
 }
 
 /* Animation gạch chân cho Item */
-.navbar-item > a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -5px;
-    left: 15px;
-    background-color: #007bff;
-    transition: width 0.3s ease;
-}
 
 .navbar-item:hover > a::after {
     width: calc(100% - 30px);
@@ -89,9 +79,10 @@ body {
 /* Dropdown Menu */
 .dropdown-menu {
     position: absolute;
-    top: 150%; /* Bắt đầu thấp hơn một chút */
+    top: 150%;
     left: 0;
-    background: #fff;
+    background: rgba(88, 88, 88, 0.1);
+     backdrop-filter: blur(10px); /* Hiệu ứng kính mờ */
     min-width: 180px;
     list-style: none;
     padding: 10px 0;
@@ -99,7 +90,7 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(10px); /* Tạo cảm giác rơi xuống */
+    transform: translateY(5px);
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -119,7 +110,7 @@ body {
 }
 
 .dropdown-menu li a:hover {
-    background: #f8f9fa;
+    background: #fdfeff21;
     color: #007bff;
-    padding-left: 25px; /* Hiệu ứng đẩy sang phải khi hover */
+    padding-left: 25px;
 }

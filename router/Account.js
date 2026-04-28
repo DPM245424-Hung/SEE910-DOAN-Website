@@ -64,13 +64,16 @@ router.get('/Sua/:id', async function(req, res, next) {
 // post: sửa tài khoản
 router.post('/Sua/:id', async function(req, res, next) {
     try {
-        const { Tentaikhoan, Email, MatKhau } = req.body;
+        const { Tentaikhoan, Email ,MatKhau, quyenhan } = req.body;
         const updateData = {
             Tentaikhoan,
-            Email
+            Email,
         };
         if (MatKhau && MatKhau.trim() !== '') {
             updateData.MatKhau = MatKhau;
+        }
+        if (quyenhan) {
+            updateData.quyenhan = quyenhan;
         }
         await account.findByIdAndUpdate(req.params.id, updateData);
         res.redirect('/account/DanhSach');
@@ -116,11 +119,14 @@ router.get('/Sua_user/:id', async function(req, res, next) {
 // sửa thông tin tài khoản cá nhân của người dùng
 router.post('/Sua_user/:id', async function(req, res, next) {
     try {
-        const { Tentaikhoan, Email, MatKhau } = req.body;
+        const { Tentaikhoan, Email, SoDienThoai, MatKhau } = req.body;
         const updateData = {
             Tentaikhoan,
-            Email
+            Email,
         };
+        if (SoDienThoai && SoDienThoai.trim() !== '') {
+            updateData.SoDienThoai = SoDienThoai;
+        }
         if (MatKhau && MatKhau.trim() !== '') {
             updateData.MatKhau = MatKhau;
         }
