@@ -125,13 +125,12 @@ router.get('/DanhSachDatVe', async function(req, res, next) {
 // get: chi tiết vé
 router.get('/detail_ticket/:id', async function(req, res, next) {
     try {
-        const ticket = await ticket.findById(req.params.id).populate('taikhoan').populate('chuyenbay');
-        if (!ticket) {
+        const ticketdata = await ticket.findById(req.params.id).populate('taikhoan').populate('chuyenbay');
+        if (!ticketdata) {
             return res.status(404).send('Vé không tồn tại');
         }
-        // Kiểm tra quyền: chỉ chủ sở hữu hoặc admin mới được xem
-        if (req.session.user && (req.session.user._id == ticket.taikhoan._id || req.session.user.quyenhan === 'admin')) {
-            res.render('booked_detail', { title: 'Chi tiết vé', ticket: ticket });
+        if (req.session.user && (req.session.user._id == ticketdata.taikhoan._id || req.session.user.quyenhan === 'admin')) {
+            res.render('booked_detail', { title: 'Chi tiết vé', ticket: ticketdata });
         } else {
             return res.status(403).send('Bạn không có quyền xem vé này');
         }

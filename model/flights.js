@@ -1,6 +1,6 @@
-var moongo = require('mongoose');
+var mongoose = require('mongoose');
 const { setMaxListeners } = require('./account');
-var flightSchema = new moongo.Schema({
+var flightSchema = new mongoose.Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
     numberseats: { type: Number, required: true },
@@ -12,5 +12,5 @@ var flightSchema = new moongo.Schema({
     airplane: { type: String, required: true },
     status: { type: String},
 });
-var flightModel = moongo.model('Flight', flightSchema);
+var flightModel = mongoose.model('Flight', flightSchema);
 module.exports = flightModel;
