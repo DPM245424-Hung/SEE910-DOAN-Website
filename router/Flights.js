@@ -2,24 +2,22 @@ var express = require('express');
 var router = express.Router();
 var flight = require('../model/flights');
 
-// Hàm xoá chuyến bay vượt quá 6 ngày
-async function deleteOldFlights() {
+async function delOldFlights() {
     try {
         const sixDaysAgo = new Date();
         sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
-        
         const result = await flight.deleteMany({ flydate: { $lt: sixDaysAgo } });
-        console.log(`Đã xoá ${result.deletedCount} chuyến bay cũ hơn 6 ngày`);
+        console.log(`Deleted ${result.deletedCount} old flights`);
         return result.deletedCount;
     } catch (error) {
-        console.error('Lỗi khi xoá chuyến bay cũ:', error);
+        console.error('Error deleting old flights:', error);
         return 0;
     }
 }
-// GET: danh sách chuyến bay
+
 router.get('/', async function(req, res, next) {
     try {
-        await deleteOldFlights(); // Xoá chuyến bay cũ trước khi hiển thị
+        await delOldFlights();
         const flights = await flight.find();
         res.render('flights_schedule', { title: 'Danh sách chuyến bay', flights: flights });
     }
@@ -28,9 +26,10 @@ router.get('/', async function(req, res, next) {
         res.status(500).send('lỗi server');
     }
 });
+
 router.get('/danhsach', async function(req, res, next) {
     try{
-        await deleteOldFlights(); // Xoá chuyến bay cũ trước khi hiển thị
+        await delOldFlights();
         const flights = await flight.find();
         res.render('flights_list', { title: 'Danh sách chuyến bay', flights: flights });
     }
@@ -40,12 +39,10 @@ router.get('/danhsach', async function(req, res, next) {
     }
 });
 
-// get: thêm chuyến bay
 router.get('/Them', function(req, res, next) {
     res.render('fights_add', { title: 'Thêm chuyến bay' });
 });
 
-// post: thêm chuyến bay
 router.post('/Them', async function(req, res, next) {
     try {
         const { name, numberseats, airline, airplane, from_airport, to_airport, flydate, price, status } = req.body;
@@ -70,11 +67,10 @@ router.post('/Them', async function(req, res, next) {
     }
 });
 
-// get: sửa chuyến bay
 router.get('/Sua/:id', async function(req, res, next) {
     try {
-        const chuyenbay = await flight.findById(req.params.id);
-        res.render('flights_change', { title: 'Sửa chuyến bay', flight: chuyenbay });
+        const flt = await flight.findById(req.params.id);
+        res.render('flights_change', { title: 'Sửa chuyến bay', flight: flt });
     }
     catch (error) {
         console.error(error);
@@ -82,7 +78,6 @@ router.get('/Sua/:id', async function(req, res, next) {
     }
 });
 
-// post: sửa chuyến bay
 router.post('/Sua/:id', async function(req, res, next) {
     try {
         const { name, numberseats, airline, airplane, from_airport, to_airport, flydate, price, status } = req.body;
@@ -105,7 +100,6 @@ router.post('/Sua/:id', async function(req, res, next) {
     }
 });
 
-// get: xoá chuyến bay
 router.get('/Xoa/:id', async function(req, res, next) {
     try {
         await flight.findByIdAndDelete(req.params.id);
@@ -117,11 +111,10 @@ router.get('/Xoa/:id', async function(req, res, next) {
     }
 });
 
-// GET: chi tiết chuyến bay
 router.get('/ChiTiet/:id', async function(req, res, next) {
     try {
-        const flightDetail = await flight.findById(req.params.id);
-        res.render('flights_detail', { title: 'Chi tiết chuyến bay', flight: flightDetail });
+        const fltDetail = await flight.findById(req.params.id);
+        res.render('flights_detail', { title: 'Chi tiết chuyến bay', flight: fltDetail });
     }
     catch (error) {
         console.error(error);
@@ -129,19 +122,18 @@ router.get('/ChiTiet/:id', async function(req, res, next) {
     }
 });
 
-// POST: xoá chuyến bay cũ hơn 6 ngày (admin)
 router.post('/cleanup-old-flights', async function(req, res, next) {
     try {
-        const deletedCount = await deleteOldFlights();
+        const delCount = await delOldFlights();
         res.json({ 
             success: true, 
-            message: `Đã xoá ${deletedCount} chuyến bay cũ hơn 6 ngày`,
-            deletedCount: deletedCount
+            message: `Deleted ${delCount} old flights`,
+            deletedCount: delCount
         });
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 

@@ -3,7 +3,7 @@ var router = express.Router();
 var ticket = require('../model/ticket');
 var flight = require('../model/flights');
 var account = require('../model/account');
-// get: trang đặt vé
+
 router.get('/', async function(req, res, next) {
     try {
         const flights = await flight.find();
@@ -15,80 +15,68 @@ router.get('/', async function(req, res, next) {
     }
 });
 
-// post: đặt vé
 router.post('/DatVe', async function(req, res, next) {
     try {
         const { Hoten, price, description, datebooking, seatsplaced, taikhoan, chuyenbay } = req.body;
         
-        // Kiểm tra các trường bắt buộc
         if (!Hoten || !seatsplaced || !chuyenbay) {
-            return res.status(400).send('Thiếu thông tin bắt buộc');
+            return res.status(400).send('Missing required info');
         }
         
-        // Kiểm tra chuyến bay tồn tại
-        const flightData = await flight.findById(chuyenbay);
-        if (!flightData) {
-            return res.status(404).send('Chuyến bay không tồn tại');
+        const fltData = await flight.findById(chuyenbay);
+        if (!fltData) {
+            return res.status(404).send('Flight not found');
         }
         
-        // Đếm số ghế được đặt
         const seatCount = seatsplaced.split(',').filter(s => s.trim()).length;
         if (seatCount === 0) {
-            return res.status(400).send('Vui lòng chọn ít nhất một ghế');
+            return res.status(400).send('Select at least one seat');
         }
         
-        // Kiểm tra số ghế còn lại
-        const seatsRemaining = flightData.numberseats - flightData.numberseats_pick;
-        if (seatCount > seatsRemaining) {
-            return res.status(400).send('Số ghế yêu cầu vượt quá số ghế còn lại. Chỉ còn ' + seatsRemaining + ' ghế');
+        const seatsLeft = fltData.numberseats - fltData.numberseats_pick;
+        if (seatCount > seatsLeft) {
+            return res.status(400).send('Not enough seats. Only ' + seatsLeft + ' available');
         }
         
-        // Tạo vé mới
-        const newTicket = new ticket({
+        const newTkt = new ticket({
             Hoten,
-            price: price || flightData.price,
+            price: price || fltData.price,
             description,
             datebooking: datebooking || new Date(),
             seatsplaced,
             taikhoan,
             chuyenbay
         });
-        await newTicket.save();
+        await newTkt.save();
         
-        // Cập nhật số ghế đã đặt của chuyến bay
         await flight.findByIdAndUpdate(chuyenbay, {
-            numberseats_pick: flightData.numberseats_pick + seatCount
+            numberseats_pick: fltData.numberseats_pick + seatCount
         });
         
         res.redirect('/booking/DanhSachDatVe');
     }
     catch (error) {
         console.error(error);
-        res.status(500).send('Lỗi: ' + error.message);
+        res.status(500).send('Error: ' + error.message);
     }
 });
 
-// get: hủy vé
 router.get('/HuyVe/:id', async function(req, res, next) {
     try {
-        // Lấy thông tin vé trước khi xoá
-        const ticketData = await ticket.findById(req.params.id);
-        if (!ticketData) {
-            return res.status(404).send('Vé không tồn tại');
+        const tktData = await ticket.findById(req.params.id);
+        if (!tktData) {
+            return res.status(404).send('Ticket not found');
         }
         
-        // Đếm số ghế đã xoá
-        const seatCount = ticketData.seatsplaced.split(',').filter(s => s.trim()).length;
+        const seatCount = tktData.seatsplaced.split(',').filter(s => s.trim()).length;
         
-        // Cập nhật số ghế đã đặt của chuyến bay (giảm)
-        const flightData = await flight.findById(ticketData.chuyenbay);
-        if (flightData) {
-            await flight.findByIdAndUpdate(ticketData.chuyenbay, {
-                numberseats_pick: Math.max(0, flightData.numberseats_pick - seatCount)
+        const fltData = await flight.findById(tktData.chuyenbay);
+        if (fltData) {
+            await flight.findByIdAndUpdate(tktData.chuyenbay, {
+                numberseats_pick: Math.max(0, fltData.numberseats_pick - seatCount)
             });
         }
         
-        // Xoá vé
         await ticket.findByIdAndDelete(req.params.id);
         res.redirect('/booking/DanhSachDatVe');
     }
@@ -98,12 +86,10 @@ router.get('/HuyVe/:id', async function(req, res, next) {
     }
 });
 
-// get: danh sách đặt vé
 router.get('/DanhSachDatVe', async function(req, res, next) {
     try {
-        try {
         if (!req.session || !req.session.user) {
-            return res.status(401).send('Bạn cần đăng nhập để xem danh sách vé'); 
+            return res.status(401).send('Login required'); 
         }
         const userId = req.session.user._id;
         const query = { taikhoan: userId }; 
@@ -112,32 +98,27 @@ router.get('/DanhSachDatVe', async function(req, res, next) {
         res.render('booked_user', { title: 'Danh sách đặt vé', tickets: tickets });
     }
     catch (error) {
-        // In ra lỗi cụ thể trong console để dễ debug hơn
-        console.error("Lỗi ở /DanhSachDatVe: ", error); 
-        res.status(500).send('Lỗi server rồi');
-    }
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).send('lỗi server rồi');
+        console.error("Error at /DanhSachDatVe: ", error); 
+        res.status(500).send('Server error');
     }
 });
-// get: chi tiết vé
+
 router.get('/detail_ticket/:id', async function(req, res, next) {
     try {
-        const ticketdata = await ticket.findById(req.params.id).populate('taikhoan').populate('chuyenbay');
-        if (!ticketdata) {
-            return res.status(404).send('Vé không tồn tại');
+        const tktData = await ticket.findById(req.params.id).populate('taikhoan').populate('chuyenbay');
+        if (!tktData) {
+            return res.status(404).send('Ticket not found');
         }
-        if (req.session.user && (req.session.user._id == ticketdata.taikhoan._id || req.session.user.quyenhan === 'admin')) {
-            res.render('booked_detail', { title: 'Chi tiết vé', ticket: ticketdata });
+        if (req.session.user && (req.session.user._id == tktData.taikhoan._id || req.session.user.quyenhan === 'admin')) {
+            res.render('booked_detail', { title: 'Chi tiết vé', ticket: tktData });
         } else {
-            return res.status(403).send('Bạn không có quyền xem vé này');
+            return res.status(403).send('Access denied');
         }
     }
     catch (error) {
         console.error(error);
-        res.status(500).send('lỗi server rồi');
+        res.status(500).send('Server error');
     }
 });
+
 module.exports = router;

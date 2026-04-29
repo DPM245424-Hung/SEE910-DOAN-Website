@@ -1,22 +1,12 @@
 var flightdata = require('./setting_flight.js');
-/**
- * Hàm kiểm tra trạng thái chuyến bay dựa trên thời gian
- * @param {string|Date} flyDate - Ngày giờ cất cánh của chuyến bay
- * @returns {object} - Object chứa { status, class, isAvailable }
- * 
- * Trạng thái:
- * - "Sẽ Bay" 
- * - "Đang Bay" 
- * - "Đã Hạ Cánh"
- */
+
 function getFlightStatus(flyDate) {
     const now = new Date();
     const flightTime = new Date(flyDate);
-    const timeDiff = flightTime - now;
-    const oneDayMs = 24 * 60 * 60 * 1000;
+    const diff = flightTime - now;
+    const day = 24 * 60 * 60 * 1000;
     
-    // Kiểm tra vượt quá 6 ngày - xoá dữ liệu
-    if (timeDiff <= -oneDayMs * 6) {
+    if (diff <= -day * 6) {
         delete flightdata.seats;
         return { 
             status: 'Đã Hủy', 
@@ -24,16 +14,14 @@ function getFlightStatus(flyDate) {
             isAvailable: false 
         };
     } 
-    // Kiểm tra vượt quá 1 ngày nhưng dưới 6 ngày
-    else if (timeDiff <= -oneDayMs) {
+    else if (diff <= -day) {
         return { 
             status: 'Đã Hạ Cánh', 
             class: 'bg-danger', 
             isAvailable: false 
         };
     } 
-    // Đang bay hoặc vừa hạ cánh (từ 0 đến -1 ngày)
-    else if (timeDiff <= 0) {
+    else if (diff <= 0) {
         return { 
             status: 'Đang Bay', 
             class: 'bg-warning', 
@@ -50,22 +38,19 @@ function getFlightStatus(flyDate) {
     }
 }
 
-/**
- * Cập nhật trạng thái chuyến bay cho page booking.ejs
- */
+
 function updateBookingFlightStatuses() {
     document.querySelectorAll('.flight-item').forEach(item => {
         const flyDate = item.getAttribute('data-flydate');
-        const statusBadge = item.querySelector('.flight-status-badge-booking');
-        const statusInfo = getFlightStatus(flyDate);
+        const badge = item.querySelector('.flight-status-badge-booking');
+        const info = getFlightStatus(flyDate);
         
-        if (statusBadge) {
-            statusBadge.textContent = statusInfo.status;
-            statusBadge.className = `flight-status-badge-booking badge ${statusInfo.class}`;
+        if (badge) {
+            badge.textContent = info.status;
+            badge.className = `flight-status-badge-booking badge ${info.class}`;
         }
         
-        // Disable/Enable item dựa trên trạng thái
-        if (!statusInfo.isAvailable) {
+        if (!info.isAvailable) {
             item.style.opacity = '0.6';
             item.style.pointerEvents = 'none';
             item.style.cursor = 'not-allowed';
@@ -77,76 +62,65 @@ function updateBookingFlightStatuses() {
     });
 }
 
-/**
- * Cập nhật trạng thái vé cho page booked_user.ejs
- */
+
 function updateTicketStatuses() {
-    // Cập nhật cho bảng desktop
-    document.querySelectorAll('.flight-status').forEach(statusBadge => {
-        const flyDate = statusBadge.getAttribute('data-flydate');
-        const statusInfo = getFlightStatus(flyDate);
-        statusBadge.textContent = statusInfo.status;
-        statusBadge.className = `flight-status badge ${statusInfo.class}`;
+    document.querySelectorAll('.flight-status').forEach(badge => {
+        const flyDate = badge.getAttribute('data-flydate');
+        const info = getFlightStatus(flyDate);
+        badge.textContent = info.status;
+        badge.className = `flight-status badge ${info.class}`;
         
-        // Disable/Enable nút hành động dựa trên trạng thái
-        const row = statusBadge.closest('tr');
+        const row = badge.closest('tr');
         if (row) {
-            const actionBtns = row.querySelectorAll('.flight-actions a, .flight-actions .btn-cancel-ticket');
-            actionBtns.forEach(btn => {
-                btn.disabled = !statusInfo.isAvailable;
-                btn.style.opacity = statusInfo.isAvailable ? '1' : '0.5';
-                btn.style.pointerEvents = statusInfo.isAvailable ? 'auto' : 'none';
+            const btns = row.querySelectorAll('.flight-actions a, .flight-actions .btn-cancel-ticket');
+            btns.forEach(btn => {
+                btn.disabled = !info.isAvailable;
+                btn.style.opacity = info.isAvailable ? '1' : '0.5';
+                btn.style.pointerEvents = info.isAvailable ? 'auto' : 'none';
             });
         }
     });
 
-    // Cập nhật cho mobile cards
-    document.querySelectorAll('.flight-status-mobile').forEach(statusBadge => {
-        const flyDate = statusBadge.getAttribute('data-flydate');
-        const statusInfo = getFlightStatus(flyDate);
-        statusBadge.textContent = statusInfo.status;
-        statusBadge.className = `flight-status-mobile badge ${statusInfo.class}`;
+    document.querySelectorAll('.flight-status-mobile').forEach(badge => {
+        const flyDate = badge.getAttribute('data-flydate');
+        const info = getFlightStatus(flyDate);
+        badge.textContent = info.status;
+        badge.className = `flight-status-mobile badge ${info.class}`;
         
-        // Disable/Enable nút hành động
-        const card = statusBadge.closest('.ticket-card');
+        const card = badge.closest('.ticket-card');
         if (card) {
-            const actionBtns = card.querySelectorAll('a, .btn-cancel-ticket-mobile');
-            actionBtns.forEach(btn => {
-                btn.disabled = !statusInfo.isAvailable;
-                btn.style.opacity = statusInfo.isAvailable ? '1' : '0.5';
-                btn.style.pointerEvents = statusInfo.isAvailable ? 'auto' : 'none';
+            const btns = card.querySelectorAll('a, .btn-cancel-ticket-mobile');
+            btns.forEach(btn => {
+                btn.disabled = !info.isAvailable;
+                btn.style.opacity = info.isAvailable ? '1' : '0.5';
+                btn.style.pointerEvents = info.isAvailable ? 'auto' : 'none';
             });
         }
     });
 }
 
-/**
- * Cập nhật trạng thái chuyến bay cho page booked_detail.ejs
- */
+
 function updateDetailFlightStatus() {
-    // Cập nhật trong chi tiết chuyến bay
     document.querySelectorAll('.flight-status-detail').forEach(badge => {
         const flyDate = badge.getAttribute('data-flydate');
-        const statusInfo = getFlightStatus(flyDate);
-        badge.textContent = statusInfo.status;
-        badge.className = `flight-status-detail badge ${statusInfo.class}`;
+        const info = getFlightStatus(flyDate);
+        badge.textContent = info.status;
+        badge.className = `flight-status-detail badge ${info.class}`;
     });
 
-    // Cập nhật trong tóm tắt vé bên phải
     document.querySelectorAll('.flight-status-summary').forEach(badge => {
         const flyDate = badge.getAttribute('data-flydate');
-        const statusInfo = getFlightStatus(flyDate);
-        badge.textContent = statusInfo.status;
-        badge.className = `flight-status-summary badge ${statusInfo.class}`;
+        const info = getFlightStatus(flyDate);
+        badge.textContent = info.status;
+        badge.className = `flight-status-summary badge ${info.class}`;
     });
 
-    // Cập nhật nút hủy vé
     const cancelBtn = document.querySelector('.ticket-cancel-btn');
     if (cancelBtn) {
         const flyDate = cancelBtn.getAttribute('data-flydate');
-        const statusInfo = getFlightStatus(flyDate);
+        const info = getFlightStatus(flyDate);
         
-        if (!statusInfo.isAvailable) {
+        if (!info.isAvailable) {
             cancelBtn.disabled = true;
             cancelBtn.textContent = '❌ Không thể hủy (Chuyến bay không khả dụng)';
             cancelBtn.style.cursor = 'not-allowed';
@@ -160,51 +134,39 @@ function updateDetailFlightStatus() {
     }
 }
 
-/**
- page flights_schedule
- */
 function updateFlightStatuses() {
     document.querySelectorAll('.flight-row').forEach(row => {
         const flyDate = row.getAttribute('data-flydate');
-        const statusBadge = row.querySelector('.flight-status-badge');
-        const actionBtn = row.querySelector('.flight-action-btn');
-        const statusInfo = getFlightStatus(flyDate);
+        const badge = row.querySelector('.flight-status-badge');
+        const btn = row.querySelector('.flight-action-btn');
+        const info = getFlightStatus(flyDate);
         
-        if (statusBadge) {
-            statusBadge.textContent = statusInfo.status;
-            statusBadge.className = `flight-status-badge badge ${statusInfo.class}`;
+        if (badge) {
+            badge.textContent = info.status;
+            badge.className = `flight-status-badge badge ${info.class}`;
         }
         
-        // Disable/Enable nút hành động dựa trên trạng thái
-        if (actionBtn) {
-            if (!statusInfo.isAvailable) {
-                if (actionBtn.tagName === 'A') {
-                    // Chuyển link thành button disabled
-                    const btn = document.createElement('button');
-                    btn.className = 'btn btn-sm btn-secondary flight-action-btn';
+        if (btn) {
+            if (!info.isAvailable) {
+                if (btn.tagName === 'A') {
+                    const newBtn = document.createElement('button');
+                    newBtn.className = 'btn btn-sm btn-secondary flight-action-btn';
+                    newBtn.disabled = true;
+                    newBtn.textContent = 'Không có sẵn';
+                    btn.parentNode.replaceChild(newBtn, btn);
+                } else {
                     btn.disabled = true;
                     btn.textContent = 'Không có sẵn';
-                    actionBtn.parentNode.replaceChild(btn, actionBtn);
-                } else {
-                    actionBtn.disabled = true;
-                    actionBtn.textContent = 'Không có sẵn';
-                    actionBtn.className = 'btn btn-sm btn-secondary flight-action-btn';
+                    btn.className = 'btn btn-sm btn-secondary flight-action-btn';
                 }
             }
         }
     });
 }
 
-/**
- * Khởi tạo cập nhật trạng thái chuyến bay (tự động cập nhật mỗi phút)
- * @param {function} updateFunction - Hàm cập nhật trạng thái tương ứng
- */
 function initFlightStatusUpdater(updateFunction) {
-    // Cập nhật lần đầu khi trang tải
     if (updateFunction && typeof updateFunction === 'function') {
         updateFunction();
-        
-        // Cập nhật mỗi phút
         setInterval(updateFunction, 10000);
     }
 }

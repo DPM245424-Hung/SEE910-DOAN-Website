@@ -1,74 +1,61 @@
-/**
- * Hàm tính toán vị trí ngồi 
- * @param {number} totalSeats - Tổng số ghế trên máy bay
- * @param {array} bookedSeats - Danh sách ghế đã đặt
- * @returns {object} - Chứa available và booked seats */
-function generateSeatMap(totalSeats, bookedSeatsString = '') {
-    const bookedArray = bookedSeatsString ? bookedSeatsString.split(',').map(s => s.trim().toUpperCase()) : [];
-    const rows = Math.ceil(totalSeats / 6); //  A-F
+function genSeatMap(total, bookedStr = '') {
+    const booked = bookedStr ? bookedStr.split(',').map(s => s.trim().toUpperCase()) : [];
+    const rows = Math.ceil(total / 6);
     const seats = [];
-    const availableSeats = [];
+    const avail = [];
     const bookedSeats = [];
     
-    for (let i = 0; i < totalSeats; i++) {
+    for (let i = 0; i < total; i++) {
         const row = Math.floor(i / 6);
         const col = i % 6;
-        const seatCode = String.fromCharCode(65 + col) + (row + 1); // A1, B1, C1...
+        const code = String.fromCharCode(65 + col) + (row + 1);
         
-        if (bookedArray.includes(seatCode)) {
-            bookedSeats.push(seatCode);
+        if (booked.includes(code)) {
+            bookedSeats.push(code);
         } else {
-            availableSeats.push(seatCode);
+            avail.push(code);
         }
         
         seats.push({
-            code: seatCode,
+            code: code,
             row: row + 1,
             column: col,
-            isBooked: bookedArray.includes(seatCode)
+            isBooked: booked.includes(code)
         });
     }
     
     return {
         seats: seats,
-        availableSeats: availableSeats,
+        availableSeats: avail,
         bookedSeats: bookedSeats,
-        totalSeats: totalSeats,
-        availableCount: availableSeats.length,
+        totalSeats: total,
+        availableCount: avail.length,
         bookedCount: bookedSeats.length,
         rows: rows
     };
 }
 
-/**
- * hiển thị bản đồ ghế
- * @param {number} totalSeats - Tổng số ghế
- * @param {string} bookedSeatsString - Chuỗi ghế đã đặt
- * @returns {string} - HTML của bản đồ ghế
- */
-function renderSeatMap(totalSeats, bookedSeatsString = '') {
-    const map = generateSeatMap(totalSeats, bookedSeatsString);
+
+function renderSeatMap(total, bookedStr = '') {
+    const map = genSeatMap(total, bookedStr);
     let html = '<div class="seat-map">';
     
-    // Render theo hàng
-    let currentRow = 0;
+    let curRow = 0;
     let rowHtml = '<div class="seat-row">';
     
     for (let i = 0; i < map.seats.length; i++) {
         const seat = map.seats[i];
-        // Nếu đổi hàng, đóng hàng cũ và mở hàng mới
-        if (seat.row !== currentRow) {
-            if (currentRow > 0) {
+        if (seat.row !== curRow) {
+            if (curRow > 0) {
                 rowHtml += '</div>';
                 html += rowHtml;
             }
-            currentRow = seat.row;
-            rowHtml = `<div class="seat-row"><span class="row-label">Hàng ${currentRow}</span>`;
+            curRow = seat.row;
+            rowHtml = `<div class="seat-row"><span class="row-label">Hàng ${curRow}</span>`;
         }
         
-        // Render ghế
-        const seatClass = seat.isBooked ? 'seat booked' : 'seat available';
-        const seatHtml = `<button type="button" class="${seatClass}" data-seat="${seat.code}" 
+        const cls = seat.isBooked ? 'seat booked' : 'seat available';
+        const seatHtml = `<button type="button" class="${cls}" data-seat="${seat.code}" 
                             ${seat.isBooked ? 'disabled' : 'onclick="toggleSeat(this)"'}
                             title="${seat.code}">
                             ${seat.code}
@@ -76,15 +63,13 @@ function renderSeatMap(totalSeats, bookedSeatsString = '') {
         rowHtml += seatHtml;
     }
     
-    // Đóng hàng cuối cùng
-    if (currentRow > 0) {
+    if (curRow > 0) {
         rowHtml += '</div>';
         html += rowHtml;
     }
     
     html += '</div>';
     
-    // Thêm chú thích
     html += `<div class="seat-legend">
                 <div class="legend-item">
                     <span class="seat available"></span> Ghế Trống
@@ -103,65 +88,44 @@ function renderSeatMap(totalSeats, bookedSeatsString = '') {
     return html;
 }
 
-/**
- * Hàm chọn/bỏ chọn ghế
- * @param {element} element - Nút ghế được click
- */
-function toggleSeat(element) {
-    element.classList.toggle('selected');
+
+function toggleSeat(el) {
+    el.classList.toggle('selected');
     updateSelectedSeats();
 }
 
-/**
- * Hàm cập nhật danh sách ghế được chọn
- */
 function updateSelectedSeats() {
-    const selectedSeats = Array.from(document.querySelectorAll('.seat.selected'))
+    const selected = Array.from(document.querySelectorAll('.seat.selected'))
         .map(seat => seat.getAttribute('data-seat'));
     
-    const seatSelectInput = document.getElementById('seatSelect');
-    if (seatSelectInput) {
-        seatSelectInput.value = selectedSeats.join(', ');
-        
-        // Trigger change event để cập nhật giá
-        const event = new Event('change', { bubbles: true });
-        seatSelectInput.dispatchEvent(event);
+    const inp = document.getElementById('seatSelect');
+    if (inp) {
+        inp.value = selected.join(', ');
+        const evt = new Event('change', { bubbles: true });
+        inp.dispatchEvent(evt);
     }
 }
 
-/**
- * Hàm khởi tạo bản đồ ghế khi trang tải
- * @param {number} totalSeats - Tổng số ghế
- * @param {string} containerId - ID của phần tử chứa bản đồ ghế
- * @param {string} bookedSeatsString - Ghế đã đặt
- */
-function initSeatMap(totalSeats, containerId, bookedSeatsString = '') {
-    const container = document.getElementById(containerId);
-    if (container) {
-        container.innerHTML = renderSeatMap(totalSeats, bookedSeatsString);
+function initSeatMap(total, id, bookedStr = '') {
+    const con = document.getElementById(id);
+    if (con) {
+        con.innerHTML = renderSeatMap(total, bookedStr);
     }
 }
 
-/**
- * Hàm xoá chọn tất cả ghế
- */
-function clearAllSeats() {
+function clearSeats() {
     document.querySelectorAll('.seat.selected').forEach(seat => {
         seat.classList.remove('selected');
     });
     updateSelectedSeats();
 }
 
-/**
- * Hàm chọn ghế được đề xuất (tự động chọn ghế trống đầu tiên)
- * @param {number} count - Số ghế cần chọn
- */
 function autoSelectSeats(count) {
-    clearAllSeats();
-    const availableSeats = Array.from(document.querySelectorAll('.seat.available'));
+    clearSeats();
+    const avail = Array.from(document.querySelectorAll('.seat.available'));
     
-    for (let i = 0; i < count && i < availableSeats.length; i++) {
-        availableSeats[i].classList.add('selected');
+    for (let i = 0; i < count && i < avail.length; i++) {
+        avail[i].classList.add('selected');
     }
     
     updateSelectedSeats();

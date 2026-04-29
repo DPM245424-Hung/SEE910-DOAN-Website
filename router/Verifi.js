@@ -2,64 +2,64 @@ var express = require('express');
 var router = express.Router();
 var account = require('../model/account');
 var bcrypt = require('bcryptjs'); 
-// get đăng nhập
+
 router.get('/dangnhap', (req, res) => {
     res.render('Login', {title: 'Đăng nhập'});
 });
-// post đăng nhập
+
 router.post('/dangnhap', async (req, res) => {
     try {
         const { Email, MatKhau } = req.body;
         const user = await account.findOne({ Email });
         if (user) {
-            const isMatch = await bcrypt.compare(MatKhau, user.MatKhau);
-            if (isMatch) {
+            const isOk = await bcrypt.compare(MatKhau, user.MatKhau);
+            if (isOk) {
                 req.session.user = user;
                 req.session.quyenhan = user.quyenhan;
-                req.session.success = 'Đăng nhập thành công';
+                req.session.success = 'Login success';
                 res.redirect('/');
             } else {
-                req.session.error = 'Mật khẩu không đúng';
+                req.session.error = 'Wrong password';
                 res.redirect('/dangnhap');
             }
         } else {
-            req.session.error = 'Email không tồn tại';
+            req.session.error = 'Email not found';
             res.redirect('/dangnhap');
         }
     } catch (error) {
         console.error(error);
-        req.session.error = 'Lỗi server';
+        req.session.error = 'Server error';
     }
 });
-// get đăng ký
+
 router.get('/dangky', async (req, res) => {
     res.render('Join', {title: 'Đăng ký'});
 });
-// post đăng ký
+
 router.post('/dangky', async (req, res) => {
     try {
         const { Tentaikhoan, Email, MatKhau } = req.body;
-        const Pass = await bcrypt.hash(MatKhau, 10);
-        const newAccount = new account({
+        const pwd = await bcrypt.hash(MatKhau, 10);
+        const newAcc = new account({
             Tentaikhoan: Tentaikhoan,
             Email: Email,
-            MatKhau: Pass
+            MatKhau: pwd
         });
-        await newAccount.save();
-        req.session.success = 'Đăng ký thành công';
+        await newAcc.save();
+        req.session.success = 'Signup success';
         res.redirect('/dangnhap');
     } catch (error) {
         console.error(error);
-        req.session.error = 'Đăng ký thất bại';
+        req.session.error = 'Signup failed';
         res.redirect('/fail');
     }
 });
-// get đăng xuất
+
 router.get('/dangxuat', (req, res) => {
     if(req.session.user) {
         delete req.session.user;
         delete req.session.quyenhan;
-        req.session.success = 'Đăng xuất thành công';
+        req.session.success = 'Logout success';
         res.redirect('/');
     }
 });
