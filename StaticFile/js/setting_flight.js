@@ -4,11 +4,8 @@
  * @param {array} bookedSeats - Danh sách ghế đã đặt
  * @returns {object} - Chứa available và booked seats */
 function generateSeatMap(totalSeats, bookedSeatsString = '') {
-    const bookedArray = bookedSeatsString 
-        ? bookedSeatsString.split(',').map(s => s.trim().toUpperCase()) 
-        : [];
-    
-    const rows = Math.ceil(totalSeats / 6); // 6 ghế mỗi hàng (A-F)
+    const bookedArray = bookedSeatsString ? bookedSeatsString.split(',').map(s => s.trim().toUpperCase()) : [];
+    const rows = Math.ceil(totalSeats / 6); //  A-F
     const seats = [];
     const availableSeats = [];
     const bookedSeats = [];

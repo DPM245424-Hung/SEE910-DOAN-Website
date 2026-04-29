@@ -17,6 +17,7 @@ body {
     justify-content: center;
     color: white;
     text-align: center;
+    border: #4eadbe9a;
 }
 .overlay {
     background: rgba(255, 255, 255, 0.057);

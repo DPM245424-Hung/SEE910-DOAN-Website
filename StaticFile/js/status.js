@@ -149,7 +149,7 @@ function updateDetailFlightStatus() {
 }
 
 /**
- * Cập nhật trạng thái chuyến bay cho page flights_schedule.ejs
+ page flights_schedule
  */
 function updateFlightStatuses() {
     document.querySelectorAll('.flight-row').forEach(row => {
