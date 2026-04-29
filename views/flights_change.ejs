@@ -210,7 +210,7 @@
                                 </div>
                             </div>
                         <% } else { %>
-                            <!-- Non-Admin View - Booking Section -->
+                            <!--  View - Booking  -->
                             <div class="card border-0 shadow-lg">
                                 <div class="card-body">
                                     <h4 class="card-title mb-4"><i class="bi bi-ticket-perforated"></i> Đặt vé</h4>
@@ -222,7 +222,7 @@
                                     </div>
 
                                     <% if (flight.numberseats - flight.numberseats_pick > 0) { %>
-                                        <!-- Booking Form -->
+                                        <!-- Form -->
                                         <form action="/booking/DatVe" method="POST">
                                             <input type="hidden" name="chuyenbay" value="<%= flight._id %>">
                                             
