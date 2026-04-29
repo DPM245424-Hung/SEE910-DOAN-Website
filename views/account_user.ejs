@@ -11,13 +11,13 @@
     <title>
         <%= title %> - Tài khoản cá nhân
     </title>
+    <link rel="stylesheet" href="/css/background.css" />
 </head>
 
 <body>
-
+    <div class="input-bg" style="--input: url('/image/LIGHT-GRADIENT.jpg');">
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
-        
         <div class="container my-5 flex-grow-1">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -45,6 +45,7 @@
         
         <%- include('Footer') %>
         <%- include('Javascript') %>
+    </div>
     </div>
 </body>
 

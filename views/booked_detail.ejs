@@ -11,11 +11,12 @@
     <title>
         <%= title %> - Chi Tiết Vé
     </title>
+    <link rel="stylesheet" href="/css/background.css" />
 </head>
 <body>
+    <div class="input-bg" style="--input: url('/image/booked.jpg');">
     <div class="container-fluid min-vh-100 px-1 d-flex flex-column">
         <%- include('Navbar') %>
-        
         <div class="flex-grow-1 py-5">
             <div class="container">
                 <nav aria-label="breadcrumb" class="mb-4">
@@ -263,6 +264,7 @@
 
         <%- include('Footer') %>
         <%- include('Javascript') %>
+    </div>
     </div>
 
     <script src="/js/status.js"></script>
