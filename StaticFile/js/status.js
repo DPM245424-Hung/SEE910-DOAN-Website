@@ -1,35 +1,47 @@
+var flightdata = require('./setting_flight.js');
 /**
  * Hàm kiểm tra trạng thái chuyến bay dựa trên thời gian
  * @param {string|Date} flyDate - Ngày giờ cất cánh của chuyến bay
  * @returns {object} - Object chứa { status, class, isAvailable }
  * 
  * Trạng thái:
- * - "Sẽ Bay" (bg-success): Chuyến bay chưa cất cánh (> 1 ngày)
- * - "Đang Bay" (bg-warning): Chuyến bay bằng hoặc vượt nhưng < 1 ngày
- * - "Đã Hạ Cánh" (bg-danger): Chuyến bay đã bay quá 1 ngày
+ * - "Sẽ Bay" 
+ * - "Đang Bay" 
+ * - "Đã Hạ Cánh"
  */
 function getFlightStatus(flyDate) {
     const now = new Date();
     const flightTime = new Date(flyDate);
     const timeDiff = flightTime - now;
-    const oneDayMs = 24 * 60 * 60 * 1000; // Một ngày tính bằng milli giây
+    const oneDayMs = 24 * 60 * 60 * 1000;
     
-    if (timeDiff <= 0 && timeDiff > -oneDayMs) {
-        // Bằng hoặc vượt quá dưới 1 ngày (âm nhưng không quá 1 ngày)
+    // Kiểm tra vượt quá 6 ngày - xoá dữ liệu
+    if (timeDiff <= -oneDayMs * 6) {
+        delete flightdata.seats;
         return { 
-            status: 'Đang Bay', 
-            class: 'bg-warning', 
+            status: 'Đã Hủy', 
+            class: 'bg-secondary', 
             isAvailable: false 
         };
-    } else if (timeDiff <= -oneDayMs) {
-        // Vượt quá 1 ngày
+    } 
+    // Kiểm tra vượt quá 1 ngày nhưng dưới 6 ngày
+    else if (timeDiff <= -oneDayMs) {
         return { 
             status: 'Đã Hạ Cánh', 
             class: 'bg-danger', 
             isAvailable: false 
         };
-    } else {
-        // Chưa bay
+    } 
+    // Đang bay hoặc vừa hạ cánh (từ 0 đến -1 ngày)
+    else if (timeDiff <= 0) {
+        return { 
+            status: 'Đang Bay', 
+            class: 'bg-warning', 
+            isAvailable: false 
+        };
+    } 
+    // Chưa bay (chuyến bay trong tương lai)
+    else {
         return { 
             status: 'Sẽ Bay', 
             class: 'bg-success', 
@@ -193,6 +205,6 @@ function initFlightStatusUpdater(updateFunction) {
         updateFunction();
         
         // Cập nhật mỗi phút
-        setInterval(updateFunction, 60000);
+        setInterval(updateFunction, 10000);
     }
 }
